@@ -12,4 +12,19 @@
         <servlet-name>HelloServlet_Web</servlet-name>
         <url-pattern>/greet</url-pattern>
     </servlet-mapping>
+    
+    
+    <servlet>
+        <servlet-name>ConfigXML</servlet-name>
+        <servlet-class>mypack.Config_init_web</servlet-class>
+        <init-param>
+            <param-name>trainer</param-name>
+            <param-value>Sruthi</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ConfigXML</servlet-name>
+        <url-pattern>/configxml</url-pattern>
+    </servlet-mapping>
 </web-app>
