@@ -1,0 +1,569 @@
+===========================
+1. BASICS OF WEB
+===========================
+
+► What is the Web?
+The World Wide Web (WWW) is a system of interlinked hypertext documents
+accessed via the Internet. It works on a request-response model using 
+the HTTP protocol.
+
+► How Does the Web Work?
+Step 1: User enters a URL in the browser (e.g., https://example.com)
+Step 2: Browser sends an HTTP Request to the web server
+Step 3: Web server processes the request (e.g., using a servlet or JSP)
+Step 4: Server sends an HTTP Response (HTML, JSON, etc.)
+Step 5: Browser renders the response for the user
+
+► Web Components:
+- Client: Web browser (Chrome, Firefox, etc.)
+- Server: Application server (Tomcat, JBoss, etc.)
+- Protocol: HTTP/HTTPS
+- Resource: HTML pages, servlets, APIs
+
+► Types of Web Applications:
+- Static Web: HTML/CSS only, no server-side processing
+- Dynamic Web: Uses server-side logic (Servlets, JSP, PHP, etc.)
+
+► Common Web Technologies:
+- Frontend: HTML, CSS, JavaScript
+- Backend: Java (Servlets, JSP), PHP, Node.js
+- Database: MySQL, Oracle, MongoDB
+
+
+===========================
+2. SERVLET LIFECYCLE
+===========================
+
+A servlet is a Java class used to handle requests and responses in web applications.
+Its lifecycle is managed by the servlet container (like Tomcat).
+
+► Lifecycle Phases:
+
+1. Initialization:
+   - The servlet container loads the servlet class.
+   - Calls the init() method once.
+   - Used for resource allocation (DB connections, etc.)
+
+2. Request Handling:
+   - For each request, service() is called.
+   - It calls doGet(), doPost(), etc., based on HTTP method.
+
+3. Destruction:
+   - When the servlet is removed, destroy() is called.
+   - Used for cleanup activities (closing DB connections).
+
+► Servlet Lifecycle Methods:
+
+- public void init(ServletConfig config)
+- public void service(ServletRequest req, ServletResponse res)
+- public void destroy()
+
+► Servlet Lifecycle Diagram:
+
+   Client (Browser)
+        |
+     [HTTP Request]
+        |
+     Servlet Container
+        |
+     [ init()  →  service() → destroy() ]
+        |
+     [HTTP Response]
+        |
+     Client (Browser)
+
+► Example Servlet:
+
+@WebServlet("/hello")
+public class HelloServlet extends HttpServlet {
+    public void init() {
+        // Initialization code
+    }
+
+    public void doGet(HttpServletRequest req, HttpServletResponse res) {
+        // Handle GET request
+    }
+
+    public void destroy() {
+        // Cleanup code
+    }
+}
+
+► Notes:
+- init() is called only once
+- service() is called for every request
+- destroy() is called when server shuts down or servlet is undeployed
+
+===========================
+3. SERVLET API
+===========================
+
+The Servlet API is a collection of classes and interfaces in Java that allow 
+developers to build dynamic web applications.
+
+► Packages in Servlet API:
+
+1. jakarta.servlet.*
+2. jakarta.servlet.http.*
+
+► Key Interfaces in jakarta.servlet:
+
+- Servlet
+- ServletConfig
+- ServletContext
+- RequestDispatcher
+- Filter (advanced topic)
+
+► Key Classes in jakarta.servlet.http:
+
+- HttpServlet
+- HttpServletRequest
+- HttpServletResponse
+- Cookie
+- HttpSession
+
+► HttpServlet (Most commonly used)
+
+Instead of implementing the Servlet interface directly, we extend HttpServlet
+and override the following methods:
+
+- doGet()     → Handles GET requests (data sent via URL)
+- doPost()    → Handles POST requests (data sent via form body)
+- doPut(), doDelete() → RESTful APIs (optional)
+
+► Example:
+
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String uname = req.getParameter("username");
+        res.getWriter().println("Welcome, " + uname);
+    }
+}
+
+► Common Methods in HttpServletRequest:
+
+- getParameter(String name)
+- getMethod()
+- getRequestURL()
+- getRemoteAddr()
+- getCookies()
+
+► Common Methods in HttpServletResponse:
+
+- setContentType(String type)
+- getWriter()
+- addCookie(Cookie c)
+- sendRedirect(String url)
+
+► Summary:
+
+Servlet API provides the base tools (HttpServlet, Request/Response, etc.)
+needed to handle HTTP requests and dynamically generate responses.
+
+===========================
+4. HTTP SERVLETS: XML vs Annotation
+===========================
+
+There are two ways to configure Servlets in Java:
+
+1. Using web.xml (Deployment Descriptor)
+2. Using @WebServlet annotation (introduced in Servlet 3.0+)
+
+====================
+A. XML Configuration
+====================
+
+► web.xml structure (inside WEB-INF folder):
+
+<web-app xmlns="http://jakarta.ee/xml/ns/jakartaee"
+         version="5.0">
+
+    <servlet>
+        <servlet-name>HelloServlet</servlet-name>
+        <servlet-class>mypack.HelloServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>HelloServlet</servlet-name>
+        <url-pattern>/hello</url-pattern>
+    </servlet-mapping>
+
+</web-app>
+
+► Pros:
+- Used in older servlet containers (backward compatibility)
+- Useful for filters, listeners, and init-params
+
+► Cons:
+- Verbose, not flexible
+
+=========================
+B. Annotation Configuration
+=========================
+
+► @WebServlet("/hello")  → added above servlet class
+
+Example:
+
+@WebServlet("/hello")
+public class HelloServlet extends HttpServlet {
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        res.getWriter().println("Hello World");
+    }
+}
+
+► Pros:
+- Simple and concise
+- No need to edit web.xml
+- Clean code, fewer files
+
+► Summary:
+
+| Configuration  | File-Based (web.xml) | Annotation-Based |
+|----------------|----------------------|------------------|
+| Verbosity      | High                 | Low              |
+| Flexibility    | High                 | Medium           |
+| Modern Use     | Rare                 | ✅ Recommended    |
+
+
+==============================
+5. SERVLET CONFIGURATION (ServletConfig)
+==============================
+
+► What is ServletConfig?
+
+- ServletConfig is an object provided by the container to give initialization
+  information to a single servlet.
+- Used to pass parameters from web.xml to servlet (per servlet basis).
+
+► Use Case:
+Pass static configuration values like DB URL, user, password, etc.
+
+► Where It’s Defined?
+Inside <init-param> tag in web.xml
+
+► Example: web.xml
+
+<web-app>
+    <servlet>
+        <servlet-name>MyServlet</servlet-name>
+        <servlet-class>mypack.MyServlet</servlet-class>
+        <init-param>
+            <param-name>adminEmail</param-name>
+            <param-value>admin@example.com</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>MyServlet</servlet-name>
+        <url-pattern>/my</url-pattern>
+    </servlet-mapping>
+</web-app>
+
+► Example: Servlet Code
+
+public class MyServlet extends HttpServlet {
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        ServletConfig config = getServletConfig();
+        String email = config.getInitParameter("adminEmail");
+
+        res.setContentType("text/html");
+        res.getWriter().println("Admin email is: " + email);
+    }
+}
+
+► Important Methods:
+- getServletConfig()  → returns ServletConfig object
+- config.getInitParameter(String name)
+
+► Key Point:
+- ServletConfig is per servlet (each servlet gets its own config)
+
+
+==============================
+6. SERVLET CONTEXT (ServletContext)
+==============================
+
+► What is ServletContext?
+
+- ServletContext is an object common to the entire web application.
+- Shared across all servlets in the same web application.
+- Used to store global data (e.g., application name, DB config, logging path)
+
+► Where It’s Defined?
+Inside <context-param> in web.xml
+
+► Example: web.xml
+
+<web-app>
+    <context-param>
+        <param-name>dbUrl</param-name>
+        <param-value>jdbc:mysql://localhost:3306/mydb</param-value>
+    </context-param>
+</web-app>
+
+► Accessing ServletContext in Servlet:
+
+public class AppServlet extends HttpServlet {
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        ServletContext context = getServletContext();
+        String db = context.getInitParameter("dbUrl");
+
+        res.setContentType("text/html");
+        res.getWriter().println("Database URL is: " + db);
+    }
+}
+
+► Other Uses:
+- context.getRealPath("/file.txt")  → to access server files
+- context.setAttribute("x", val)   → shared variable
+- context.getAttribute("x")        → access shared variable
+
+► Difference Between Config and Context:
+
+| Feature          | ServletConfig        | ServletContext          |
+|------------------|----------------------|--------------------------|
+| Scope            | One Servlet          | Whole application        |
+| Defined in       | <init-param>         | <context-param>          |
+| Sharing          | Not shared           | Shared across servlets   |
+
+
+==============================
+7. SERVLET COLLABORATION
+==============================
+
+► What is Servlet Collaboration?
+
+- It is the process where one servlet communicates or forwards a request
+  to another servlet.
+- Mainly done using RequestDispatcher interface.
+
+► Two Types:
+
+1. Forwarding
+2. Including
+
+------------------------------
+► 1. Forwarding (RequestDispatcher.forward)
+------------------------------
+- Control is transferred from one servlet to another
+- Client is unaware of the change
+- Original request and response objects are used
+
+Example:
+
+RequestDispatcher rd = req.getRequestDispatcher("second");
+rd.forward(req, res);
+
+------------------------------
+► 2. Including (RequestDispatcher.include)
+------------------------------
+- Includes content of another resource (servlet/JSP) into response
+- Output from both servlets are combined
+
+Example:
+
+RequestDispatcher rd = req.getRequestDispatcher("footer");
+rd.include(req, res);
+
+------------------------------
+► Servlet Redirection (Optional)
+------------------------------
+- Redirection using response.sendRedirect("url") tells browser to go to another resource
+- Causes a new request and response
+
+► Difference: Forward vs Redirect
+
+| Feature          | Forward              | Redirect               |
+|------------------|----------------------|-------------------------|
+| Server/Client    | Server-side          | Client-side             |
+| URL Changes?     | No                   | Yes                     |
+| Performance      | Fast (no extra round trip) | Slower (extra HTTP call) |
+| Request Object   | Same                 | New                     |
+
+
+
+==============================
+8. SESSION TRACKING
+==============================
+
+► What is Session Tracking?
+
+- Session tracking is a way to maintain user data across multiple HTTP requests.
+- HTTP is stateless, so each request is independent — session tracking maintains "continuity".
+
+► Use Cases:
+- Login systems
+- Shopping carts
+- User preferences
+
+► 4 Types of Session Tracking:
+
+----------------------------------------
+1. Using Cookies
+----------------------------------------
+
+- A small piece of data stored in the client browser
+- Automatically sent with each request to the server
+
+Example (Set Cookie):
+
+Cookie c = new Cookie("username", "admin");
+res.addCookie(c);
+
+Example (Read Cookie):
+
+Cookie[] cookies = req.getCookies();
+for(Cookie c : cookies) {
+    if (c.getName().equals("username")) {
+        out.println("Hello " + c.getValue());
+    }
+}
+
+► Notes:
+- Cookies can be session (deleted when browser closes) or persistent
+
+----------------------------------------
+2. URL Rewriting
+----------------------------------------
+
+- Session info is appended to the URL
+
+Example:
+
+<a href="dashboard?user=admin">Go to Dashboard</a>
+
+On server:
+
+String user = req.getParameter("user");
+
+► Problem: Can be seen and modified in browser
+
+----------------------------------------
+3. Hidden Form Fields
+----------------------------------------
+
+- Data is stored in hidden input field and passed via form submission
+
+Example:
+
+<input type="hidden" name="userId" value="admin">
+
+► Requires the form to be submitted — not automatic
+
+----------------------------------------
+4. HttpSession (Most Recommended)
+----------------------------------------
+
+- Built-in Java interface to manage session
+
+Create/Get session:
+
+HttpSession session = req.getSession();
+session.setAttribute("username", "admin");
+
+Access session:
+
+String user = (String) session.getAttribute("username");
+
+Invalidate session:
+
+session.invalidate();
+
+► Notes:
+- Server creates a session ID and sends it to the browser (usually via cookie)
+- Automatically maintained by container
+
+► Summary:
+
+| Method         | Stored Where | Secure | Works Automatically |
+|----------------|--------------|--------|---------------------|
+| Cookie         | Client       | Medium | Yes                 |
+| URL Rewriting  | Client URL   | Low    | Yes                 |
+| Hidden Field   | HTML Form    | Low    | No (requires form)  |
+| HttpSession    | Server       | ✅ High| ✅ Yes               |
+
+
+==============================
+9. CRUD OPERATIONS USING SERVLETS
+==============================
+
+► What is CRUD?
+
+CRUD = Create, Read, Update, Delete — the 4 basic database operations.
+
+► Tools Required:
+- Servlet + JSP (optional)
+- JDBC
+- MySQL (or any DB)
+
+----------------------------------------
+A. Create (Insert Record)
+----------------------------------------
+
+HTML Form:
+<form action="insert" method="post">
+  Name: <input name="name">
+  Age: <input name="age">
+  <input type="submit">
+</form>
+
+Servlet Code:
+String name = req.getParameter("name");
+int age = Integer.parseInt(req.getParameter("age"));
+
+Connection con = DriverManager.getConnection(...);
+PreparedStatement pst = con.prepareStatement("INSERT INTO student VALUES (?, ?)");
+pst.setString(1, name);
+pst.setInt(2, age);
+pst.executeUpdate();
+
+----------------------------------------
+B. Read (Display Records)
+----------------------------------------
+
+Servlet Code:
+Connection con = DriverManager.getConnection(...);
+Statement st = con.createStatement();
+ResultSet rs = st.executeQuery("SELECT * FROM student");
+
+while (rs.next()) {
+   out.println(rs.getString("name") + " - " + rs.getInt("age"));
+}
+
+----------------------------------------
+C. Update (Modify Record)
+----------------------------------------
+
+Form:
+<form action="update" method="post">
+  Enter ID: <input name="id">
+  New Name: <input name="name">
+  <input type="submit">
+</form>
+
+Servlet:
+PreparedStatement pst = con.prepareStatement("UPDATE student SET name=? WHERE id=?");
+pst.setString(1, name);
+pst.setInt(2, id);
+pst.executeUpdate();
+
+----------------------------------------
+D. Delete (Remove Record)
+----------------------------------------
+
+<form action="delete" method="post">
+  ID to delete: <input name="id">
+</form>
+
+Servlet:
+PreparedStatement pst = con.prepareStatement("DELETE FROM student WHERE id=?");
+pst.setInt(1, id);
+pst.executeUpdate();
+
+----------------------------------------
+► Best Practices:
+- Use DAO pattern (separate DB logic)
+- Handle exceptions and close connections
+- Validate user inputs
