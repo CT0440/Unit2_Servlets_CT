@@ -27,4 +27,38 @@
         <servlet-name>ConfigXML</servlet-name>
         <url-pattern>/configxml</url-pattern>
     </servlet-mapping>
+    
+    
+    
+     <!-- Context Parameter -->
+    <context-param>
+        <param-name>Trainer</param-name>
+        <param-value>Susruthi Kanaparthi</param-value>
+    </context-param>
+
+
+
+
+    <!-- Context1 -->
+    <servlet>
+        <servlet-name>Context1</servlet-name>
+        <servlet-class>mypack.Context1</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Context1</servlet-name>
+        <url-pattern>/context1</url-pattern>
+    </servlet-mapping>
+    
+    
+    <!-- Context2 -->
+ <servlet>
+    <servlet-name>Context2</servlet-name>
+    <servlet-class>mypack.Context2</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>Context2</servlet-name>
+    <url-pattern>/context2</url-pattern>
+</servlet-mapping>
+    
 </web-app>
